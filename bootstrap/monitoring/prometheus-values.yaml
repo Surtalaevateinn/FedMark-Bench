@@ -1,0 +1,14 @@
+prometheus:
+  prometheusSpec:
+    # 限制存储时长和资源占用
+    retention: 2d
+    resources:
+      requests:
+        memory: "1Gi"
+      limits:
+        memory: "2Gi"
+    # 确保能采集到宿主机以外的自定义指标
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+grafana:
+  adminPassword: "admin" # 设置 Grafana 默认密码

@@ -1,0 +1,7 @@
+# 忽略所有敏感凭证（后期建议用环境变量或 Secret 管理）
+*.config
+kubeconfig.yaml
+# 忽略临时日志
+*.log
+# 忽略压缩包
+*.tar.gz
