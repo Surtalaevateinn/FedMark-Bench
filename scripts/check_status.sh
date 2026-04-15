@@ -31,7 +31,7 @@ echo "Monitoring Pods: $(kubectl get pods -n monitoring --no-headers | wc -l)"
 echo ""
 echo "🌌 [6/6] Federation Member Status (Karmada View)"
 # 核心验证：检查联邦是否真正收编了子集群
-K_CONFIG="--kubeconfig ~/karmada-config/karmada-apiserver.config"
+K_CONFIG="--kubeconfig ${HOME}/karmada-config/karmada-apiserver.config"
 kubectl $K_CONFIG get clusters --no-headers | awk '{printf "Cluster: %-12s | Status: %-5s | Version: %s\n", $1, $4, $2}'
 
 echo "------------------------------------------------"
