@@ -1,0 +1,140 @@
+apiVersion: v1
+kind: Node
+metadata:
+  name: member-1-node-1
+  labels:
+    type: kwok
+  annotations:
+    kwok.x-k8s.io/node: fake  # 固化注解，确保 Stage 自动匹配
+spec:
+  taints:
+  - effect: NoSchedule
+    key: kwok.x-k8s.io/node  # 预设污点，将在 resume.sh 中统一容忍或移除
+    value: fake
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: member-1-node-2
+  labels:
+    type: kwok
+  annotations:
+    kwok.x-k8s.io/node: fake  # 固化注解，确保 Stage 自动匹配
+spec:
+  taints:
+  - effect: NoSchedule
+    key: kwok.x-k8s.io/node  # 预设污点，将在 resume.sh 中统一容忍或移除
+    value: fake
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: member-1-node-3
+  labels:
+    type: kwok
+  annotations:
+    kwok.x-k8s.io/node: fake  # 固化注解，确保 Stage 自动匹配
+spec:
+  taints:
+  - effect: NoSchedule
+    key: kwok.x-k8s.io/node  # 预设污点，将在 resume.sh 中统一容忍或移除
+    value: fake
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: member-1-node-4
+  labels:
+    type: kwok
+  annotations:
+    kwok.x-k8s.io/node: fake  # 固化注解，确保 Stage 自动匹配
+spec:
+  taints:
+  - effect: NoSchedule
+    key: kwok.x-k8s.io/node  # 预设污点，将在 resume.sh 中统一容忍或移除
+    value: fake
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: member-1-node-5
+  labels:
+    type: kwok
+  annotations:
+    kwok.x-k8s.io/node: fake  # 固化注解，确保 Stage 自动匹配
+spec:
+  taints:
+  - effect: NoSchedule
+    key: kwok.x-k8s.io/node  # 预设污点，将在 resume.sh 中统一容忍或移除
+    value: fake
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: member-1-node-6
+  labels:
+    type: kwok
+  annotations:
+    kwok.x-k8s.io/node: fake  # 固化注解，确保 Stage 自动匹配
+spec:
+  taints:
+  - effect: NoSchedule
+    key: kwok.x-k8s.io/node  # 预设污点，将在 resume.sh 中统一容忍或移除
+    value: fake
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: member-1-node-7
+  labels:
+    type: kwok
+  annotations:
+    kwok.x-k8s.io/node: fake  # 固化注解，确保 Stage 自动匹配
+spec:
+  taints:
+  - effect: NoSchedule
+    key: kwok.x-k8s.io/node  # 预设污点，将在 resume.sh 中统一容忍或移除
+    value: fake
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: member-1-node-8
+  labels:
+    type: kwok
+  annotations:
+    kwok.x-k8s.io/node: fake  # 固化注解，确保 Stage 自动匹配
+spec:
+  taints:
+  - effect: NoSchedule
+    key: kwok.x-k8s.io/node  # 预设污点，将在 resume.sh 中统一容忍或移除
+    value: fake
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: member-1-node-9
+  labels:
+    type: kwok
+  annotations:
+    kwok.x-k8s.io/node: fake  # 固化注解，确保 Stage 自动匹配
+spec:
+  taints:
+  - effect: NoSchedule
+    key: kwok.x-k8s.io/node  # 预设污点，将在 resume.sh 中统一容忍或移除
+    value: fake
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: member-1-node-10
+  labels:
+    type: kwok
+  annotations:
+    kwok.x-k8s.io/node: fake  # 固化注解，确保 Stage 自动匹配
+spec:
+  taints:
+  - effect: NoSchedule
+    key: kwok.x-k8s.io/node  # 预设污点，将在 resume.sh 中统一容忍或移除
+    value: fake
+---

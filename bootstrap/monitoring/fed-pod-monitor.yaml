@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: fed-workload-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  # 不再尝试抓取不存在的 metrics 端口，而是让 Prometheus 发现这些 Pod
+  selector:
+    matchLabels:
+      app: nginx
+  namespaceSelector:
+    matchNames:
+      - fed-workload
+  podMetricsEndpoints:
+  - port: web
+    interval: 30s
+    honorLabels: true
