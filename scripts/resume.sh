@@ -1,8 +1,8 @@
 #!/bin/bash
-# FedMark Infrastructure Resume Script V4.1 - Observability Aware
+# FedMark Infrastructure Resume Script V4.2 - Propagation Aware
 # Guiding Principle: Immutable Infrastructure & Self-Healing Architecture.
 
-echo "🚀 Starting Full FedMark Infrastructure Recovery (V4.1)..."
+echo "🚀 Starting Full FedMark Infrastructure Recovery (V4.2)..."
 
 # --- Step 0: Clear Finalizer Deadlocks ---
 echo "--- Step 0: Clearing Namespace Deadlocks ---"
@@ -67,12 +67,19 @@ if ! kubectl $K_CONFIG get cluster member-1 2>/dev/null | grep -q "True"; then
     echo "✅ Federation link re-established via Internal IP."
 fi
 
+# --- Step 2.5: Propagation Policy Realignment (New in V4.2) ---
+# 确保联邦大脑的“指挥棒”逻辑始终在线
+echo "--- Step 2.5: Re-applying Propagation Policy ---"
+if [ -f bootstrap/karmada/nginx-propagation.yaml ]; then
+    kubectl $K_CONFIG apply -f bootstrap/karmada/nginx-propagation.yaml
+    echo "✅ Propagation policy applied to Federation Brain."
+fi
+
 # --- Step 3: Workload Rescheduling ---
 echo "--- Step 3: Triggering Workload Rescheduling ---"
 kubectl $K_CONFIG rollout restart deployment nginx-fed -n fed-workload 2>/dev/null
 
-# --- Step 4: Observability Alignment (New in V4.1) ---
-# 确保 Prometheus PodMonitor 始终存在，以解决 Grafana "No Data" 问题
+# --- Step 4: Observability Alignment ---
 echo "--- Step 4: Re-applying Observability Config ---"
 if [ -f bootstrap/monitoring/fed-pod-monitor.yaml ]; then
     kubectl apply -f bootstrap/monitoring/fed-pod-monitor.yaml
