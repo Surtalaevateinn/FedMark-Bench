@@ -1,0 +1,18 @@
+chmod +x scripts/*.sh
+./scripts/resume.sh
+source ~/.bashrc
+
+kubectl port-forward -n monitoring svc/prometheus-stack-grafana --address 0.0.0.0 3000:80
+
+kubectl port-forward -n v-space pod/v-space-0-0 --address 0.0.0.0 8443:8443
+
+./scripts/push_all.sh
+
+
+
+
+docker ps --filter "name=member-1-control-plane" --format "{{.Ports}}"
+kubectl config view --minify | grep server
+curl -k https://127.0.0.1:39209/version
+
+kind create cluster --name member-1 --config kind-config.yaml --image kindest/node:v1.27.3
