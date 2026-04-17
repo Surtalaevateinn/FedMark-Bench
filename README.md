@@ -11,65 +11,63 @@ This project implements a "Triple-Layer Nested" infrastructure:
 
 ---
 
+## 📂 Repository Structure
+```text
+.
+├── bootstrap/               # Infrastructure-as-Code (IaC) definitions
+│   ├── karmada/             # L2 Federation policies and agents
+│   ├── monitoring/          # Observability stack configurations
+│   └── nodes.yaml           # L1.5 Simulated node blueprints
+├── clusters/                # Cluster-specific credentials and metadata
+├── scripts/                 # Automation and Telemetry suite
+├── kind-config.yaml         # L1 Physical cluster specification
+└── nginx-deployment.yaml    # Core benchmarking workload
+```
+
+### Key Files Definition
+* **`kind-config.yaml`**: The "Physical Anchor." It fixes the API Server port to **39209** to prevent networking drift.
+* **`bootstrap/nodes.yaml`**: The "Birth Certificate" for simulated nodes, defining labels and annotations for KWOK.
+* **`bootstrap/karmada/nginx-propagation.yaml`**: The "Conductor's Baton." Defines the L2 policy for distributing workloads to member clusters.
+* **`scripts/resume.sh`**: The "Self-Healing Engine." Automates the realignment of all architectural layers.
+* **`scripts/check_status.sh`**: The "Architect's Eye." Provides a holistic audit of the environment's health.
+
+---
+
 ## 🛠 Prerequisites & Dependencies
-Before deployment, ensure the following software is installed on your Ubuntu VM:
-
-### 1. Core Runtimes
-* **Docker Engine**: The L0 runtime for all containers.
-* **Go (Golang)**: Required if building components from source.
-
-### 2. Command Line Tools (Binaries)
-Ensure these are in your `$PATH`:
-* **kubectl**: Standard Kubernetes CLI.
-* **kind**: Kubernetes-in-Docker tool for L1 infrastructure.
-* **karmadactl**: CLI for Karmada federation management.
-* **vcluster**: CLI for managing virtual clusters.
-* **helm**: Required for deploying Prometheus/Grafana stacks.
+Ensure the following software is installed on your Ubuntu VM:
+* **Runtimes**: Docker Engine (L0), Go (Golang).
+* **Binaries**: `kubectl`, `kind`, `karmadactl`, `vcluster`, `helm`.
 
 ---
 
 ## 🔄 Fresh Deployment Guide
-Follow these steps to build the environment from scratch on a new machine.
-
 ### Phase 1: Infrastructure Reconstruction
-Build the L1 physical base and L1.5 simulation layer:
-
-**1. Create L1 Physical Cluster (Fixed Port 39209)**
+Build the L1 base and L1.5 simulation layer:
 ```bash
-# Uses kind-config.yaml to prevent API port drift
+# 1. Create L1 Cluster with Fixed Port 39209
 kind create cluster --name member-1 --config kind-config.yaml --image kindest/node:v1.27.3
-```
 
-**2. Install KWOK Controller & Stages**
-```bash
+# 2. Install KWOK Controller
 kubectl apply -f https://github.com/kubernetes-sigs/kwok/releases/download/v0.6.0/kwok.yaml
 kubectl apply -f https://github.com/kubernetes-sigs/kwok/releases/download/v0.6.0/stage-fast.yaml
 ```
 
 ### Phase 2: Federation & Logic Alignment
-**1. Initialize Karmada Control Plane (L2)**
 ```bash
-# Initialize the brain on the host
+# 1. Initialize Karmada Control Plane
 sudo ./karmadactl init --kubeconfig ${HOME}/.kube/config
 
-# Align configuration for automation scripts
+# 2. Align configuration for automation
 mkdir -p ${HOME}/karmada-config
 sudo cp /etc/karmada/karmada-apiserver.config ${HOME}/karmada-config/
 sudo chown $USER:$USER ${HOME}/karmada-config/karmada-apiserver.config
-```
 
-**2. Execute Master Self-Healing & Alignment**
-```bash
+# 3. Execute Master Self-Healing & Alignment
 chmod +x scripts/*.sh
 ./scripts/resume.sh
-```
 
-**3. Deploy L3 Virtual Cluster & Agents**
-```bash
-# Deploy Federation Agents
+# 4. Deploy vcluster and Federation Agents
 kubectl apply -f bootstrap/karmada/karmada-agent.yaml
-
-# Deploy Virtual Cluster
 kubectl create ns v-space
 vcluster create v-space-0 -n v-space --connect=false
 ```
@@ -77,31 +75,20 @@ vcluster create v-space-0 -n v-space --connect=false
 ---
 
 ## 📊 Access & Monitoring
-Maintain these tunnels in **separate terminals** to enable observability:
-
-**Terminal A: Grafana Dashboard**
-```bash
-# Access via http://localhost:3000 (admin/admin)
-kubectl port-forward -n monitoring svc/prometheus-stack-grafana --address 0.0.0.0 3000:80
-```
-
-**Terminal B: vcluster API Tunnel**
-```bash
-# Required for L2-to-L3 communication
-kubectl port-forward -n v-space pod/v-space-0-0 --address 0.0.0.0 8443:8443
-```
+Maintain these tunnels in **separate terminals**:
+* **Grafana Dashboard**: `kubectl port-forward -n monitoring svc/prometheus-stack-grafana --address 0.0.0.0 3000:80`.
+* **vcluster API**: `kubectl port-forward -n v-space pod/v-space-0-0 --address 0.0.0.0 8443:8443`.
 
 ---
 
 ## ✅ Final Architectural Audit
-Verify the "Golden State" using the telemetry script:
 ```bash
 ./scripts/check_status.sh
 ```
-**Expected Success Criteria:**
+**Success Criteria:**
 - **Nodes Ready**: 10/10 with 32C/64G resources injected.
-- **Workload**: 50/50 Nginx Pods Running across simulated nodes.
-- **Federation**: Status True (member-1 connected).
+- **Workload**: 50/50 Nginx Pods Running.
+- **Federation**: Status True.
 
 ---
 
