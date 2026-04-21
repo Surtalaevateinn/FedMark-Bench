@@ -1,75 +1,66 @@
-# FedMark-Bench (Architect V6.0)
+# FedMark-Bench
 
-A High-Fidelity, Multi-Cluster Kubernetes Federation Benchmarking Framework.
+A High-Reliability Multi-Cluster Kubernetes Federation Benchmarking Environment.
 
-## 🏗️ Architectural Topology
-This project implements a **Dual-Cluster, Physically Isolated** infrastructure:
-- **Host (Management Layer)**: `kind-karmada-host` cluster.
-  - **Control Plane**: Karmada API Server & Scheduler.
-  - **Worker Node**: Hosts the `karmada-controller-manager` and Monitoring stack (Prometheus/Grafana).
-- **Member (Computing Layer)**: `kind-member-1` cluster.
-  - **Topology**: Dual-node Kind setup (1 Master + 1 Worker).
-  - **L1.5 Simulation**: 10 high-density simulated nodes via **KWOK**, injected with **32C/64G** profile.
-- **Federation Mode**: **Push Mode** with automated TLS CA-injection and RBAC piercing.
+## 🏗 Architecture Overview
+This project implements a "Decoupled Management & Computing" infrastructure:
+- **L1 (Infrastructure)**: Dual-cluster setup using Kind. 
+    - `kind-karmada-host`: Management cluster hosting the observability stack and federation brain.
+    - `kind-member-1`: Execution cluster with dedicated control-plane and worker nodes.
+- **L1.5 (Simulation)**: 10 high-density fake nodes via KWOK on `member-1`, injecting 320C/640G total virtual resources.
+- **L2 (Federation)**: Karmada control plane in **Push Mode**, using automated CA/Token injection for secure cross-cluster orchestration.
+- **L3 (Monitoring)**: Prometheus/Grafana stack isolated on the Host control-plane to prevent resource contention.
 
 ---
 
 ## 📂 Repository Structure
-```text
 .
-├── bootstrap/               # Infrastructure-as-Code (IaC)
-│   ├── karmada/             # Federation policies (PropagationPolicy)
-│   ├── monitoring/          # Observability stack (PodMonitors/Values)
-│   └── nodes.yaml           # KWOK Simulated node blueprints
-├── scripts/                 # Automation & Telemetry Suite
-│   ├── resume.sh            # [V6.0] Self-Healing Engine (Auth Piercing)
-│   ├── inspect-fed.sh       # [V5.1] Holistic Multi-Cluster Auditor
-│   └── push_all.sh          # One-click Git synchronization
-├── kind-config.yaml         # Host cluster physical specification
-├── member-config.yaml       # Member cluster dual-node specification
-└── nginx-deployment.yaml    # Core benchmarking resource template
-🔄 Self-Healing & Recovery
-The system is designed for deterministic recovery. After a VM reboot or cluster restart, execute:
+├── bootstrap/               # Infrastructure-as-Code (IaC) definitions
+│   ├── karmada/             # Federation policies and resource templates
+│   ├── monitoring/          # Observability (Prometheus/Grafana) configurations
+│   └── nodes.yaml           # KWOK simulated node blueprints
+├── scripts/                 # Automation & Architect's Toolkit
+│   ├── resume.sh            # V6.0: Automated auth piercing & self-healing
+│   ├── inspect-fed.sh       # V5.1: Cross-context multi-dimensional auditor
+│   └── push_all.sh          # One-click repository synchronization
+├── host-config.yaml         # Topology for the Federation Host cluster
+├── member-config.yaml       # Topology for the Member Execution cluster
+└── nginx-deployment.yaml    # Standard benchmarking workload template
 
-Bash
-# Executing the Auth-Piercing Resume Engine
+---
+
+## 🔄 Infrastructure Recovery & Alignment
+The environment is designed for deterministic recovery after VM reboots using the V6.0 "Auth-Piercing" logic.
+
+### Phase 1: Context Alignment
+Ensure your local `kubeconfig` has access to both clusters:
+kind export kubeconfig --name karmada-host
+kind export kubeconfig --name member-1
+
+### Phase 2: Master Self-Healing
+Execute the architect's engine to align nodes, inject certificates, and repair RBAC:
+chmod +x scripts/*.sh
 ./scripts/resume.sh
-What V6.0 Resume does:
 
-Nodes Alignment: Re-injects 32C/64G profiles into 10 KWOK nodes.
+---
 
-Auth Piercing: Automatically extracts Member-1 CA/Token and patches Host Secrets.
-
-RBAC Alignment: Injects cluster-admin permissions for the Federation ServiceAccount.
-
-Logic Pulse: Restarts Karmada controllers to flush stale TLS connections.
-
-📊 Holistic Inspection
-Use the architect's eye to audit the entire stack:
-
-Bash
+## 📊 Monitoring & Audit
+### Holistic Health Check
+Run the cross-cluster inspector to verify the state of Docker, KWOK, Karmada, and Workloads:
 ./scripts/inspect-fed.sh
-Success Criteria:
 
-Infrastructure: All Docker containers running with valid IPs.
+### Observability Access
+Maintain the following tunnel in a separate terminal:
+* **Grafana**: `kubectl config use-context kind-karmada-host && kubectl port-forward -n monitoring svc/prometheus-stack-grafana --address 0.0.0.0 3000:80`
 
-Federation: member-1 status is READY: True.
+---
 
-Resources: KWOK nodes report 320 Cores total.
+## ✅ Success Criteria (Success Audit)
+- **Federation**: `kubectl get cluster` returns `READY: True`.
+- **Simulation**: 10 KWOK nodes show `32C/64G` allocatable resources.
+- **Workload**: `nginx-fed` Pods are successfully distributed across `member-1-node-x`.
+- **Security**: TLS `caBundle` and ServiceAccount `Token` are dynamically synchronized.
 
-Workload: Nginx pods distributed across member-1-node-x.
+---
 
-🛠️ Access & Monitoring
-Grafana Dashboard: kubectl config use-context kind-karmada-host && kubectl port-forward -n monitoring svc/prometheus-stack-grafana 3000:80 --address 0.0.0.0
-
-Federated API: Use the K_CONFIG alias to interact with the global control plane:
-export K_CONFIG="--kubeconfig ${HOME}/karmada-config/karmada-apiserver.config"
-
-⚖️ Philosophical Grounding
-Deterministic Automation: Every authentication hurdle is solved by code, not manual intervention.
-
-Risk Management: Physical isolation of management and compute resources prevents cascading failures.
-
-Selective Acceptance: We value the system's ability to recover from a "Forbidden" or "Unauthorized" state through rigorous logic.
-
-✅ Maintained by: Gemini-Architect-v6.0
+⚖️ **Identity**: This framework is built on the principles of rigorous risk management and the rejection of manual drift in favor of deterministic automation.
