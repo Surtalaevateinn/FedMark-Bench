@@ -1,23 +1,29 @@
 #!/bin/bash
-# FedMark Infrastructure Resume Script V4.2 - Propagation Aware
-# Guiding Principle: Immutable Infrastructure & Self-Healing Architecture.
+# FedMark Infrastructure Resume Script V6.0 - Architect Edition
+# Guiding Principle: Automated Authentication Piercing & Resource Realignment.
 
-echo "🚀 Starting Full FedMark Infrastructure Recovery (V4.2)..."
+echo "🚀 Starting Multi-Cluster FedMark Recovery (V6.0)..."
 
-# --- Step 0: Clear Finalizer Deadlocks ---
-echo "--- Step 0: Clearing Namespace Deadlocks ---"
-for ns in fed-workload karmada-system; do
-  if kubectl get ns $ns 2>/dev/null | grep -q "Terminating"; then
-    echo "🧹 Scrubbing finalizers from $ns..."
-    kubectl get ns $ns -o json | jq '.spec.finalizers = []' | kubectl replace --raw /api/v1/namespaces/$ns/finalize -f - 2>/dev/null
-  fi
-done
+# 1. 变量准备
+MEMBER_CONTEXT="kind-member-1"
+HOST_CONTEXT="kind-karmada-host"
+K_CONFIG="--kubeconfig ${HOME}/karmada-config/karmada-apiserver.config"
 
-# --- Step 1: KWOK Infrastructure Realignment ---
-echo "--- Step 1: Aligning Simulated Nodes & KWOK Stages ---"
+# 获取物理容器 IP
+MEMBER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' member-1-control-plane 2>/dev/null)
+
+if [ -z "$MEMBER_IP" ]; then
+    echo "❌ Error: member-1-control-plane container not found. Please start kind clusters first."
+    exit 1
+fi
+
+# --- Step 1: Member-1 仿真底座与权限对齐 ---
+echo "--- Step 1: Aligning Member-1 Nodes & RBAC ---"
+kubectl config use-context $MEMBER_CONTEXT
+
+# 节点定义与 KWOK Stage
 if [ -f bootstrap/nodes.yaml ]; then
     kubectl apply -f bootstrap/nodes.yaml
-    echo "✅ Nodes definition applied from bootstrap/nodes.yaml."
 fi
 
 kubectl apply -f - <<STAGE_EOF
@@ -28,69 +34,113 @@ metadata:
 spec:
   resourceRef:
     kind: Node
-    apiVersion: v1
   selector:
     matchAnnotations:
       kwok.x-k8s.io/node: fake
   next:
     statusTemplate: |
-      conditions:
-        - type: Ready
-          status: "True"
-          reason: "KubeletReady"
-          message: "kwok-controller is simulating a healthy node"
+      conditions: [{type: "Ready", status: "True", reason: "KubeletReady"}]
 STAGE_EOF
 
-echo "🧹 Cleansing NoSchedule taints from simulated nodes..."
+# 物理资源注入 (32核/64G)
 for i in {1..10}; do
-  kubectl taint nodes member-1-node-$i kwok.x-k8s.io/node- 2>/dev/null
-  kubectl patch node member-1-node-$i --subresource=status -p '{
-    "status": {
-      "allocatable": {"cpu": "32", "memory": "64Gi", "pods": "110"},
-      "capacity": {"cpu": "32", "memory": "64Gi", "pods": "110"}
-    }
-  }' 2>/dev/null
+    kubectl patch node member-1-node-$i --subresource=status -p '{"status":{"allocatable":{"cpu":"32","memory":"64Gi","pods":"110"},"capacity":{"cpu":"32","memory":"64Gi","pods":"110"}}}' 2>/dev/null
 done
-echo "✅ 10 Simulated Nodes Ready & Resources Patched."
 
-# --- Step 2: Federation Command Chain Recovery ---
-echo "--- Step 2: Fixing Federation Connectivity ---"
-MEMBER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' member-1-control-plane 2>/dev/null)
-K_CONFIG="--kubeconfig ${HOME}/karmada-config/karmada-apiserver.config"
+# 【核心改进】自动生成并提取真实管理员 Token
+kubectl apply -f - <<TOKEN_EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: karmada-admin-token
+  namespace: kube-system
+  annotations:
+    kubernetes.io/service-account.name: default
+type: kubernetes.io/service-account-token
+TOKEN_EOF
 
-if ! kubectl $K_CONFIG get cluster member-1 2>/dev/null | grep -q "True"; then
-    echo "⚠️  Federation link broken or IP shifted. Re-aligning to $MEMBER_IP..."
-    cp ~/.kube/config ~/member-1-internal.config
-    sed -i "s|https://127.0.0.1:[0-9]*|https://$MEMBER_IP:6443|g" ~/member-1-internal.config
-    karmadactl unjoin member-1 $K_CONFIG 2>/dev/null
-    karmadactl join member-1 --cluster-kubeconfig ~/member-1-internal.config $K_CONFIG
-    echo "✅ Federation link re-established via Internal IP."
-fi
+# 赋予精准 RBAC 权限
+kubectl create clusterrolebinding karmada-admin-binding --clusterrole=cluster-admin --serviceaccount=kube-system:default 2>/dev/null || true
 
-# --- Step 2.5: Propagation Policy Realignment (New in V4.2) ---
-# 确保联邦大脑的“指挥棒”逻辑始终在线
-echo "--- Step 2.5: Re-applying Propagation Policy ---"
+REAL_TOKEN_B64=$(kubectl get secret -n kube-system karmada-admin-token -o jsonpath='{.data.token}')
+REAL_CA_B64=$(kubectl config view --raw -o jsonpath='{.clusters[?(@.name=="kind-member-1")].cluster.certificate-authority-data}')
+
+echo "✅ Member-1: Nodes Ready, RBAC Pierced, Token Extracted."
+
+# --- Step 2: Host 联邦链路穿透 ---
+echo "--- Step 2: Re-aligning Federation Link via Real Token ---"
+kubectl config use-context $HOST_CONTEXT
+
+# 构造基于证书的 Kubeconfig
+NEW_KUBECONFIG_B64=$(sed "s|https://127.0.0.1:[0-9]*|https://$MEMBER_IP:6443|g" ~/.kube/config | base64 -w 0)
+
+kubectl $K_CONFIG create ns karmada-cluster 2>/dev/null || true
+kubectl $K_CONFIG create ns fed-workload 2>/dev/null || true
+
+# 注入包含真实 CA 和 Token 的 Secret
+kubectl $K_CONFIG apply -f - <<REG_EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: member-1-secret
+  namespace: karmada-cluster
+data:
+  kubeconfig: $NEW_KUBECONFIG_B64
+  caBundle: $REAL_CA_B64
+  token: $REAL_TOKEN_B64
+---
+apiVersion: cluster.karmada.io/v1alpha1
+kind: Cluster
+metadata:
+  name: member-1
+spec:
+  apiEndpoint: https://$MEMBER_IP:6443
+  syncMode: Push
+  secretRef:
+    name: member-1-secret
+    namespace: karmada-cluster
+REG_EOF
+
+# 强制重启控制器以刷新连接
+kubectl delete pod -n karmada-system -l app=karmada-controller-manager --force --grace-period=0 >/dev/null 2>&1
+
+echo "✅ Host: Federation Secret Updated, Controller Pulsed."
+
+# --- Step 3: 调度策略与负载自愈 ---
+echo "--- Step 3: Re-applying Policies & Workloads ---"
 if [ -f bootstrap/karmada/nginx-propagation.yaml ]; then
     kubectl $K_CONFIG apply -f bootstrap/karmada/nginx-propagation.yaml
-    echo "✅ Propagation policy applied to Federation Brain."
 fi
 
-# --- Step 3: Workload Rescheduling ---
-echo "--- Step 3: Triggering Workload Rescheduling ---"
-kubectl $K_CONFIG rollout restart deployment nginx-fed -n fed-workload 2>/dev/null
-
-# --- Step 4: Observability Alignment ---
-echo "--- Step 4: Re-applying Observability Config ---"
-if [ -f bootstrap/monitoring/fed-pod-monitor.yaml ]; then
-    kubectl apply -f bootstrap/monitoring/fed-pod-monitor.yaml
-    echo "✅ PodMonitor applied for fed-workload tracking."
+# 确保 Deployment 模板存在
+kubectl $K_CONFIG get deployment nginx-fed -n fed-workload >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    kubectl $K_CONFIG apply -f - <<DEP_EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-fed
+  namespace: fed-workload
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.19.0
+        resources:
+          limits: {cpu: "100m", memory: "100Mi"}
+          requests: {cpu: "100m", memory: "100Mi"}
+DEP_EOF
 fi
 
-# --- Step 5: Environment Alias ---
-if ! grep -q "alias kfed=" ~/.bashrc; then
-    echo "alias kfed='kubectl $K_CONFIG'" >> ~/.bashrc
-    echo "✅ Alias 'kfed' added to .bashrc."
-fi
-
-echo "🌟 System Resume Complete."
-./scripts/check_status.sh
+echo "🌟 Multi-Cluster Resume Complete. Waiting for health check..."
+./scripts/inspect-fed.sh
+sleep 5
+kubectl $K_CONFIG get cluster
