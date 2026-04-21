@@ -1,95 +1,75 @@
-# FedMark-Bench
+# FedMark-Bench (Architect V6.0)
 
-A Multi-Dimensional Kubernetes Federation Benchmarking Environment.
+A High-Fidelity, Multi-Cluster Kubernetes Federation Benchmarking Framework.
 
-## 🏗 Architecture Overview
-This project implements a "Triple-Layer Nested" infrastructure:
-- **L1 (Host)**: Managed via Kind (`member-1`).
-- **L1.5 (Simulation)**: 10 high-density fake nodes via KWOK with injected 32C/64G resources.
-- **L2 (Federation)**: Karmada control plane orchestrating workloads via Propagation Policies.
-- **L3 (Virtual)**: Tenant isolation using `vcluster` within the `v-space` namespace.
+## 🏗️ Architectural Topology
+This project implements a **Dual-Cluster, Physically Isolated** infrastructure:
+- **Host (Management Layer)**: `kind-karmada-host` cluster.
+  - **Control Plane**: Karmada API Server & Scheduler.
+  - **Worker Node**: Hosts the `karmada-controller-manager` and Monitoring stack (Prometheus/Grafana).
+- **Member (Computing Layer)**: `kind-member-1` cluster.
+  - **Topology**: Dual-node Kind setup (1 Master + 1 Worker).
+  - **L1.5 Simulation**: 10 high-density simulated nodes via **KWOK**, injected with **32C/64G** profile.
+- **Federation Mode**: **Push Mode** with automated TLS CA-injection and RBAC piercing.
 
 ---
 
 ## 📂 Repository Structure
 ```text
 .
-├── bootstrap/               # Infrastructure-as-Code (IaC) definitions
-│   ├── karmada/             # L2 Federation policies and agents
-│   ├── monitoring/          # Observability stack configurations
-│   └── nodes.yaml           # L1.5 Simulated node blueprints
-├── clusters/                # Cluster-specific credentials and metadata
-├── scripts/                 # Automation and Telemetry suite
-├── kind-config.yaml         # L1 Physical cluster specification
-└── nginx-deployment.yaml    # Core benchmarking workload
-```
+├── bootstrap/               # Infrastructure-as-Code (IaC)
+│   ├── karmada/             # Federation policies (PropagationPolicy)
+│   ├── monitoring/          # Observability stack (PodMonitors/Values)
+│   └── nodes.yaml           # KWOK Simulated node blueprints
+├── scripts/                 # Automation & Telemetry Suite
+│   ├── resume.sh            # [V6.0] Self-Healing Engine (Auth Piercing)
+│   ├── inspect-fed.sh       # [V5.1] Holistic Multi-Cluster Auditor
+│   └── push_all.sh          # One-click Git synchronization
+├── kind-config.yaml         # Host cluster physical specification
+├── member-config.yaml       # Member cluster dual-node specification
+└── nginx-deployment.yaml    # Core benchmarking resource template
+🔄 Self-Healing & Recovery
+The system is designed for deterministic recovery. After a VM reboot or cluster restart, execute:
 
-### Key Files Definition
-* **`kind-config.yaml`**: The "Physical Anchor." It fixes the API Server port to **39209** to prevent networking drift.
-* **`bootstrap/nodes.yaml`**: The "Birth Certificate" for simulated nodes, defining labels and annotations for KWOK.
-* **`bootstrap/karmada/nginx-propagation.yaml`**: The "Conductor's Baton." Defines the L2 policy for distributing workloads to member clusters.
-* **`scripts/resume.sh`**: The "Self-Healing Engine." Automates the realignment of all architectural layers.
-* **`scripts/check_status.sh`**: The "Architect's Eye." Provides a holistic audit of the environment's health.
-
----
-
-## 🛠 Prerequisites & Dependencies
-Ensure the following software is installed on your Ubuntu VM:
-* **Runtimes**: Docker Engine (L0), Go (Golang).
-* **Binaries**: `kubectl`, `kind`, `karmadactl`, `vcluster`, `helm`.
-
----
-
-## 🔄 Fresh Deployment Guide
-### Phase 1: Infrastructure Reconstruction
-Build the L1 base and L1.5 simulation layer:
-```bash
-# 1. Create L1 Cluster with Fixed Port 39209
-kind create cluster --name member-1 --config kind-config.yaml --image kindest/node:v1.27.3
-
-# 2. Install KWOK Controller
-kubectl apply -f https://github.com/kubernetes-sigs/kwok/releases/download/v0.6.0/kwok.yaml
-kubectl apply -f https://github.com/kubernetes-sigs/kwok/releases/download/v0.6.0/stage-fast.yaml
-```
-
-### Phase 2: Federation & Logic Alignment
-```bash
-# 1. Initialize Karmada Control Plane
-sudo ./karmadactl init --kubeconfig ${HOME}/.kube/config
-
-# 2. Align configuration for automation
-mkdir -p ${HOME}/karmada-config
-sudo cp /etc/karmada/karmada-apiserver.config ${HOME}/karmada-config/
-sudo chown $USER:$USER ${HOME}/karmada-config/karmada-apiserver.config
-
-# 3. Execute Master Self-Healing & Alignment
-chmod +x scripts/*.sh
+Bash
+# Executing the Auth-Piercing Resume Engine
 ./scripts/resume.sh
+What V6.0 Resume does:
 
-# 4. Deploy vcluster and Federation Agents
-kubectl apply -f bootstrap/karmada/karmada-agent.yaml
-kubectl create ns v-space
-vcluster create v-space-0 -n v-space --connect=false
-```
+Nodes Alignment: Re-injects 32C/64G profiles into 10 KWOK nodes.
 
----
+Auth Piercing: Automatically extracts Member-1 CA/Token and patches Host Secrets.
 
-## 📊 Access & Monitoring
-Maintain these tunnels in **separate terminals**:
-* **Grafana Dashboard**: `kubectl port-forward -n monitoring svc/prometheus-stack-grafana --address 0.0.0.0 3000:80`.
-* **vcluster API**: `kubectl port-forward -n v-space pod/v-space-0-0 --address 0.0.0.0 8443:8443`.
+RBAC Alignment: Injects cluster-admin permissions for the Federation ServiceAccount.
 
----
+Logic Pulse: Restarts Karmada controllers to flush stale TLS connections.
 
-## ✅ Final Architectural Audit
-```bash
-./scripts/check_status.sh
-```
-**Success Criteria:**
-- **Nodes Ready**: 10/10 with 32C/64G resources injected.
-- **Workload**: 50/50 Nginx Pods Running.
-- **Federation**: Status True.
+📊 Holistic Inspection
+Use the architect's eye to audit the entire stack:
 
----
+Bash
+./scripts/inspect-fed.sh
+Success Criteria:
 
-⚖️ **Identity & Philosophical Grounding**: Emphasizing rigorous risk management, deterministic automation, and the self-actualization of a Full-Stack Architect.
+Infrastructure: All Docker containers running with valid IPs.
+
+Federation: member-1 status is READY: True.
+
+Resources: KWOK nodes report 320 Cores total.
+
+Workload: Nginx pods distributed across member-1-node-x.
+
+🛠️ Access & Monitoring
+Grafana Dashboard: kubectl config use-context kind-karmada-host && kubectl port-forward -n monitoring svc/prometheus-stack-grafana 3000:80 --address 0.0.0.0
+
+Federated API: Use the K_CONFIG alias to interact with the global control plane:
+export K_CONFIG="--kubeconfig ${HOME}/karmada-config/karmada-apiserver.config"
+
+⚖️ Philosophical Grounding
+Deterministic Automation: Every authentication hurdle is solved by code, not manual intervention.
+
+Risk Management: Physical isolation of management and compute resources prevents cascading failures.
+
+Selective Acceptance: We value the system's ability to recover from a "Forbidden" or "Unauthorized" state through rigorous logic.
+
+✅ Maintained by: Gemini-Architect-v6.0
