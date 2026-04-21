@@ -14,6 +14,7 @@ This project implements a "Decoupled Management & Computing" infrastructure:
 ---
 
 ## 📂 Repository Structure
+```text
 .
 ├── bootstrap/               # Infrastructure-as-Code (IaC) definitions
 │   ├── karmada/             # Federation policies and resource templates
@@ -26,6 +27,7 @@ This project implements a "Decoupled Management & Computing" infrastructure:
 ├── host-config.yaml         # Topology for the Federation Host cluster
 ├── member-config.yaml       # Topology for the Member Execution cluster
 └── nginx-deployment.yaml    # Standard benchmarking workload template
+```
 
 ---
 
@@ -34,20 +36,26 @@ The environment is designed for deterministic recovery after VM reboots using th
 
 ### Phase 1: Context Alignment
 Ensure your local `kubeconfig` has access to both clusters:
+```bash
 kind export kubeconfig --name karmada-host
 kind export kubeconfig --name member-1
+```
 
 ### Phase 2: Master Self-Healing
 Execute the architect's engine to align nodes, inject certificates, and repair RBAC:
+```bash
 chmod +x scripts/*.sh
 ./scripts/resume.sh
+```
 
 ---
 
 ## 📊 Monitoring & Audit
 ### Holistic Health Check
 Run the cross-cluster inspector to verify the state of Docker, KWOK, Karmada, and Workloads:
+```bash
 ./scripts/inspect-fed.sh
+```
 
 ### Observability Access
 Maintain the following tunnel in a separate terminal:
