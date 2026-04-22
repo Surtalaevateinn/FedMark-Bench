@@ -1,0 +1,53 @@
+apiVersion: v1
+data:
+  client-ca-file: |
+    -----BEGIN CERTIFICATE-----
+    MIIC/jCCAeagAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl
+    cm5ldGVzMB4XDTI2MDQyMjE4MzM0N1oXDTM2MDQxOTE4MzM0N1owFTETMBEGA1UE
+    AxMKa3ViZXJuZXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMGQ
+    rb2dUxxX29SibaZxp41rdCeiFTbkDOy6ca7KZs15yVbm+JtNolQi3hm+jH37y6z6
+    TBF2Ft76qLPQe9w6ihLfXsaMsGcOYJnK7MxrPA5Dv5N0yPgYxwk0rjVn74pK+S7C
+    Q8ufxlEW/Vmspq7OYVWp4zgstpMEHcW+W3Mfll+Ejy1dAfHO/ICO+VXkzQO+ZqPr
+    ZKKWZYPYXvXC7d7ahOczYy+Qm77gDYqndrhErPrO3LKO5E1fUFnjzkb6D3Fgxzdt
+    KoSO5dGVA/h3E85XNH8CnbvO8Jt7IBh7399RW7+ebY7/8/B3zoplLbqCJ+tXYW7m
+    4ROI6+gQCPu7SnZ89RUCAwEAAaNZMFcwDgYDVR0PAQH/BAQDAgKkMA8GA1UdEwEB
+    /wQFMAMBAf8wHQYDVR0OBBYEFFBwW7hfHej+iEtzlFvs3NmAJcd8MBUGA1UdEQQO
+    MAyCCmt1YmVybmV0ZXMwDQYJKoZIhvcNAQELBQADggEBAIBVeJZZCaVDswWfi/Fj
+    6QQsXbQC5bJF6SGQ/eIr2/49UAKC8HNZN+WKSdnPtjf7vD5KjGXgQ/y+9wNBC/nE
+    qmv7qxEWgX/O01AxKvy/BWgVNUA9WQOzjWomrZXhgC1EyzDu9X8q6La9ia/jcUl1
+    4KNdti8t2pqidKBQlBIQs81697FoFWlsZurwRJ2xtj2TcFiv8gB2WyFSzwEDSjsA
+    olZAe6KvPR35lRcV53LBisIBRZfome9WLjJrI20YCJy4GQXvRllLgdc3mte712Lk
+    oI/jwwqBtlFz5rOtMUmZljerjsGGsPO5xuYsLj423NfifkXi14/USY7OCtWZtadX
+    h3k=
+    -----END CERTIFICATE-----
+  requestheader-allowed-names: '["front-proxy-client"]'
+  requestheader-client-ca-file: |
+    -----BEGIN CERTIFICATE-----
+    MIIDCjCCAfKgAwIBAgIBADANBgkqhkiG9w0BAQsFADAZMRcwFQYDVQQDEw5mcm9u
+    dC1wcm94eS1jYTAeFw0yNjA0MjIxODMzNDhaFw0zNjA0MTkxODMzNDhaMBkxFzAV
+    BgNVBAMTDmZyb250LXByb3h5LWNhMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+    CgKCAQEA29agyZE/1svlHB4dsEnM68N9u44HUnxE3ZDzc/sduqliTvpYjllexgr2
+    Ts1evSYa+PjamKMVM7IpoUI8c9wZyVFRsP2Za5Phr2dSUEbdd9vpfBQlwbO2ux5m
+    XyHfb8Pw4ADXVy9aVxIVxuvo78pfuXaethpOSlPFsFwE+ltC6/iYrVDyEYUsE+hh
+    s1VBAzjrdQnWMPAiMbyQYMvpUI8J0BaOodUwmw1bHAtlvW2a7B9LP2d/qEeUyPWK
+    EgCPtFp9G2uaANkcP6P1GitrLXFwzXPeF2ZxC4wAd3rqR4AaIIizsGeleiPd9twS
+    n+PxvngfdjrBQ7EEBq+V7zJTGJ1QPQIDAQABo10wWzAOBgNVHQ8BAf8EBAMCAqQw
+    DwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUYRVWVEZP7950wMrI+1ZvKLlpLP8w
+    GQYDVR0RBBIwEIIOZnJvbnQtcHJveHktY2EwDQYJKoZIhvcNAQELBQADggEBALN1
+    m3ssOu+k1uU0u9H8yx8AZYCs8JukjjI+D4OArd09B3Crg9i7M397SxYfec9bRuq6
+    n5bzLJe+/wDXzKOq/re/2OvQrUOY5/sx5nKjr4cnkyjP3XnQQ+aY68iH+cQRR4nd
+    C0Bd7vlH8UFTpb/hx3Yz4j456gfrn/L6SIOxX8UejZ/L02AajDoNTOI3g2XQti0T
+    Ga08s9Vp6kqCy88aabhKH74qZRlcD2lk9xloCdTIhGpyB6QoQ8xX4sHiPI7tFcZ+
+    C2cnjAoFuWTZLFR8JgQBkOwKGCeNI9spQ6AlDQZGqOoQauJOXC6QJx7CT0YDsqk/
+    ZuDfOQEtNKwNZ9GsjMU=
+    -----END CERTIFICATE-----
+  requestheader-extra-headers-prefix: '["X-Remote-Extra-"]'
+  requestheader-group-headers: '["X-Remote-Group"]'
+  requestheader-username-headers: '["X-Remote-User"]'
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2026-04-22T18:33:59Z"
+  name: extension-apiserver-authentication
+  namespace: kube-system
+  resourceVersion: "26"
+  uid: 3d6edf3a-98f2-44b9-820d-df2e57dd7df2
