@@ -4,5 +4,7 @@ nodes:
 - role: control-plane
   extraPortMappings:
   - containerPort: 6443
-    hostPort: 39209  # 固化这个端口
+    hostPort: 39209      # 固化成員集群 API 端口
+    listenAddress: "0.0.0.0"
     protocol: TCP
+- role: worker

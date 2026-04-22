@@ -8,7 +8,16 @@ kubectl port-forward -n v-space pod/v-space-0-0 --address 0.0.0.0 8443:8443
 
 ./scripts/push_all.sh
 
+kubectl config use-context kind-karmada-host
+kubectl config use-context kind-member-1
 
+
+
+kubectl config use-context kind-karmada-host
+kubectl get pods -n monitoring -o custom-columns=NAME:.metadata.name,NODE:.spec.nodeName | grep -v "node-exporter"
+kubectl get pods -n karmada-system -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,NODE:.spec.nodeName
+
+kubectl get pods -A -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace,NODE:.spec.nodeName,STATUS:.status.phase | grep -E "monitoring|karmada-system" | sort -k3
 
 
 docker ps --filter "name=member-1-control-plane" --format "{{.Ports}}"

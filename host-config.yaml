@@ -2,4 +2,9 @@ kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
+  extraPortMappings:
+  - containerPort: 32443 # 聯邦 API 內部端口
+    hostPort: 32443      # 固化宿主機端口
+    listenAddress: "0.0.0.0"
+    protocol: TCP
 - role: worker
