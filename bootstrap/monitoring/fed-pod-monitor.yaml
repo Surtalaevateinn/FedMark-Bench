@@ -6,14 +6,12 @@ metadata:
   labels:
     release: prometheus-stack
 spec:
-  # 不再尝试抓取不存在的 metrics 端口，而是让 Prometheus 发现这些 Pod
   selector:
     matchLabels:
-      app: nginx
+      app: fake-pod
   namespaceSelector:
     matchNames:
-      - fed-workload
+    - fed-workload
   podMetricsEndpoints:
-  - port: web
-    interval: 30s
-    honorLabels: true
+  - port: metrics
+    interval: 15s

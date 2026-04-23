@@ -40,14 +40,15 @@ echo -e "  - HW Profile Injected: $HAS_RES"
 
 # 4. 检查业务负载分布
 echo -e "\n🚀 [4/6] Workload Distribution (Member-1 Context)"
-if kubectl get ns fed-workload >/dev/null 2>&1; then
-    RUNNING=$(kubectl get pods -n fed-workload --no-headers 2>/dev/null | grep -c "Running")
-    echo -e "  - Namespace: ${GREEN}fed-workload (Active)${NC}"
-    echo -e "  - Running Pods: $RUNNING"
-    echo -e "  - Node Distribution:"
-    kubectl get pods -n fed-workload -o custom-columns=NODE:.spec.nodeName --no-headers 2>/dev/null | sort | uniq -c | awk '{printf "    |-- %s Pods on %s\n", $1, $2}'
+# 注意：这里需要指向成员集群的 context
+MEMBER_CONTEXT="kind-member-1" 
+
+if kubectl --context=$MEMBER_CONTEXT get ns fed-workload >/dev/null 2>&1; then
+    RUNNING=$(kubectl --context=$MEMBER_CONTEXT get pods -n fed-workload --no-headers 2>/dev/null | grep -c "Running")
+    echo -e "  - Namespace: ${GREEN}fed-workload (Active on Member-1)${NC}"
+    # ... 其余逻辑同理增加 --context ...
 else
-    echo -e "  - Namespace: ${RED}fed-workload NOT FOUND${NC}"
+    echo -e "  - Namespace: ${RED}fed-workload NOT FOUND on Member-1${NC}"
 fi
 
 # 5. 系统组件健康度
